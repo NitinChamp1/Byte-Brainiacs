@@ -38,16 +38,16 @@ export default function AdminLogin() {
             <h1 style={{ fontSize: '28px', fontWeight: 700, marginBottom: '8px' }}>Admin <span className="gradient-text">Login</span></h1>
             <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>ByteBrainiacs Management Portal</p>
           </div>
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          <form onSubmit={handleSubmit} autoComplete="off" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div className="form-group">
               <label className="form-label">Admin Email</label>
               <input type="email" className="form-input" value={email} onChange={e => setEmail(e.target.value)}
-                placeholder="admin@bytebrainiacs.com" required />
+                placeholder="admin@bytebrainiacs.com" autoComplete="off" required />
             </div>
             <div className="form-group">
               <label className="form-label">Password</label>
               <input type="password" className="form-input" value={password} onChange={e => setPassword(e.target.value)}
-                placeholder="••••••••" required />
+                placeholder="••••••••" autoComplete="new-password" required />
             </div>
             <button type="submit" className="btn btn-primary" disabled={loading} style={{ marginTop: '8px' }}>
               {loading ? '⏳ Logging in...' : '→ Login to Dashboard'}
