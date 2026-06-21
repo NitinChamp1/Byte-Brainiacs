@@ -53,9 +53,6 @@ export default function AdminLogin() {
               {loading ? '⏳ Logging in...' : '→ Login to Dashboard'}
             </button>
           </form>
-          <p style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px', marginTop: '24px' }}>
-            Default: admin@bytebrainiacs.com / Admin@1234
-          </p>
         </div>
       </div>
     </div>
