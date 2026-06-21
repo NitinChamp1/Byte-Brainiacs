@@ -48,16 +48,15 @@
 .navbar-links {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 16px;
   list-style: none;
 }
 .navbar-links .btn {
-  margin-left: 12px;
+  margin-left: 24px;
 }
 
-
 .nav-link {
-  padding: 8px 14px;
+  padding: 6px 12px;
   border-radius: var(--radius-sm);
   font-size: 14px;
   font-weight: 500;
