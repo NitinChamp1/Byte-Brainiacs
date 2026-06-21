@@ -42,9 +42,10 @@ const registrationLimiter = rateLimit({
   max: 10, // max 10 registration attempts per 15 minutes per IP
   message: { success: false, message: 'Too many registration attempts. Please try again later.' },
 });
-app.use('/api/', limiter);
-app.use('/api/auth', authLimiter);
-app.use('/api/participants/register', registrationLimiter);
+app.use(['/api/', '/'], limiter);
+app.use(['/api/auth', '/auth'], authLimiter);
+app.use(['/api/participants/register', '/participants/register'], registrationLimiter);
+
 
 // (No special raw body parsing needed for Razorpay verify)
 
@@ -57,17 +58,17 @@ app.use(morgan('dev'));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // ─── Routes ────────────────────────────────────────────────────────
-app.use('/api/auth', authRoutes);
-app.use('/api/participants', participantRoutes);
-app.use('/api/teams', teamRoutes);
-app.use('/api/previous-participants', previousParticipantRoutes);
-app.use('/api/notifications', notificationRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/contact', contactRoutes);
+app.use(['/api/auth', '/auth'], authRoutes);
+app.use(['/api/participants', '/participants'], participantRoutes);
+app.use(['/api/teams', '/teams'], teamRoutes);
+app.use(['/api/previous-participants', '/previous-participants'], previousParticipantRoutes);
+app.use(['/api/notifications', '/notifications'], notificationRoutes);
+app.use(['/api/dashboard', '/dashboard'], dashboardRoutes);
+app.use(['/api/payments', '/payments'], paymentRoutes);
+app.use(['/api/contact', '/contact'], contactRoutes);
 
 // ─── Health Check ──────────────────────────────────────────────────
-app.get('/api/health', (req, res) => {
+app.get(['/api/health', '/health'], (req, res) => {
   res.json({ success: true, message: 'ByteBrainiacs API is running 🚀', timestamp: new Date() });
 });
 
