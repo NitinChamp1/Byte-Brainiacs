@@ -66,18 +66,33 @@ const getChartData = async (req, res) => {
       })
     );
 
-    // Status breakdown
+    // Run status and type breakdown queries in parallel
+    const [
+      approvedCount,
+      rejectedCount,
+      pendingCount,
+      waitingCount,
+      individualCount,
+      teamCount
+    ] = await Promise.all([
+      Participant.countDocuments({ status: 'approved' }),
+      Participant.countDocuments({ status: 'rejected' }),
+      Participant.countDocuments({ status: 'pending' }),
+      Participant.countDocuments({ status: 'waiting_for_team' }),
+      Participant.countDocuments({ registrationType: 'individual' }),
+      Participant.countDocuments({ registrationType: 'team' })
+    ]);
+
     const statusBreakdown = [
-      { name: 'Approved', value: await Participant.countDocuments({ status: 'approved' }) },
-      { name: 'Rejected', value: await Participant.countDocuments({ status: 'rejected' }) },
-      { name: 'Pending', value: await Participant.countDocuments({ status: 'pending' }) },
-      { name: 'Waiting for Team', value: await Participant.countDocuments({ status: 'waiting_for_team' }) },
+      { name: 'Approved', value: approvedCount },
+      { name: 'Rejected', value: rejectedCount },
+      { name: 'Pending', value: pendingCount },
+      { name: 'Waiting for Team', value: waitingCount },
     ];
 
-    // Type breakdown
     const typeBreakdown = [
-      { name: 'Individual', value: await Participant.countDocuments({ registrationType: 'individual' }) },
-      { name: 'Team', value: await Participant.countDocuments({ registrationType: 'team' }) },
+      { name: 'Individual', value: individualCount },
+      { name: 'Team', value: teamCount },
     ];
 
     res.json({ success: true, registrationsOverTime, statusBreakdown, typeBreakdown });

@@ -87,20 +87,29 @@ app.use((err, req, res, next) => {
 });
 
 // ─── MongoDB + Server Start ────────────────────────────────────────
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => {
-    // BUG 3 FIX: Never log the full URI — it contains the DB password
+let isConnected = false;
+
+const connectDB = async () => {
+  if (isConnected) {
+    return;
+  }
+  try {
+    const db = await mongoose.connect(process.env.MONGO_URI);
+    isConnected = db.connections[0].readyState;
     console.log('✅ MongoDB connected successfully.');
-    const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => {
-      console.log(`🚀 ByteBrainiacs server running on http://localhost:${PORT}`);
-    });
-  })
-  .catch((err) => {
+  } catch (err) {
     console.error('❌ MongoDB connection failed:', err.message);
-    process.exit(1);
+  }
+};
+
+connectDB();
+
+if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+  const PORT = process.env.PORT || 5000;
+  app.listen(PORT, () => {
+    console.log(`🚀 ByteBrainiacs server running on http://localhost:${PORT}`);
   });
+}
 // Force nodemon reload - env updated
 
 module.exports = app;
