@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const compression = require('compression');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const path = require('path');
@@ -19,6 +20,7 @@ const contactRoutes = require('./routes/contact');
 const app = express();
 
 // ─── Security Middleware ───────────────────────────────────────────
+app.use(compression());
 app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
 app.use(cors({
   origin: process.env.CLIENT_URL || 'http://localhost:5173',
