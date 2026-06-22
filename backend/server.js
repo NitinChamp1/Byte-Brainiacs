@@ -30,18 +30,18 @@ app.use(cors({
 // ─── Rate Limiting ─────────────────────────────────────────────────
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,
+  max: 500,
   message: { success: false, message: 'Too many requests, please try again later.' },
 });
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 10,
+  max: 50,
   message: { success: false, message: 'Too many login attempts, please try again later.' },
 });
 // BUG 6 FIX: Dedicated stricter limiter for registration endpoint
 const registrationLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 10, // max 10 registration attempts per 15 minutes per IP
+  max: 20, // max 20 registration attempts per 15 minutes per IP
   message: { success: false, message: 'Too many registration attempts. Please try again later.' },
 });
 app.use(['/api/', '/'], limiter);
