@@ -289,20 +289,24 @@ const updateParticipantStatus = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Participant not found.' });
 
     // Send email & notification
-    if (status === 'approved') {
-      await sendApprovalEmail(participant);
-      await Notification.create({
-        email: participant.email,
-        message: `Congratulations! Your registration for ByteBrainiacs has been approved.`,
-        type: 'approval',
-      });
-    } else if (status === 'rejected') {
-      await sendRejectionEmail(participant, adminNote);
-      await Notification.create({
-        email: participant.email,
-        message: `Your registration was not selected. ${adminNote || ''}`,
-        type: 'rejection',
-      });
+    try {
+      if (status === 'approved') {
+        await sendApprovalEmail(participant);
+        await Notification.create({
+          email: participant.email,
+          message: `Congratulations! Your registration for ByteBrainiacs has been approved.`,
+          type: 'approval',
+        });
+      } else if (status === 'rejected') {
+        await sendRejectionEmail(participant, adminNote);
+        await Notification.create({
+          email: participant.email,
+          message: `Your registration was not selected. ${adminNote || ''}`,
+          type: 'rejection',
+        });
+      }
+    } catch (emailErr) {
+      console.error('⚠️ Participant status updated, but failed to send email/notification:', emailErr.message);
     }
 
     // Log activity
@@ -357,23 +361,17 @@ const deleteParticipant = async (req, res) => {
           memberId => memberId.toString() !== participant._id.toString()
         );
 
-        if (remainingMemberIds.length === 0) {
-          // No members left — delete the whole team and clear teamId on any stragglers
+        if (remainingMemberIds.length < 2) {
+          // Team is now below minimum size (min 2). Disband team and return straggler(s) to pool.
           await Participant.updateMany(
-            { teamId: team._id },
+            { _id: { $in: remainingMemberIds } },
             { $unset: { teamId: '' } }
           );
           await Team.findByIdAndDelete(team._id);
         } else {
-          // Still has members — update team list and clear teamId on remaining members
-          // so they can be re-allocated if needed
+          // Still has >= 2 members (valid size). Just update team list.
           team.members = remainingMemberIds;
           await team.save();
-          // Clear teamId on remaining members so they re-appear in allocation pool
-          await Participant.updateMany(
-            { _id: { $in: remainingMemberIds } },
-            { $unset: { teamId: '' }, status: 'approved' }
-          );
         }
       }
     }

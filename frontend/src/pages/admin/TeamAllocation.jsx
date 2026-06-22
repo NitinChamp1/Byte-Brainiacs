@@ -29,7 +29,7 @@ export default function TeamAllocation() {
   };
 
   const allocate = async () => {
-    if (selected.length !== 3) return toast.error('Select exactly 3', 'Please select exactly 3 participants.');
+    if (selected.length < 2 || selected.length > 3) return toast.error('Select 2 or 3', 'Please select 2 or 3 participants.');
     if (!teamName.trim()) return toast.error('Team name required', 'Enter a team name.');
     setSubmitting(true);
     try {
@@ -57,7 +57,7 @@ export default function TeamAllocation() {
           <div>
             <h1 className="admin-title">Team Allocation</h1>
             <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>
-              Select exactly 3 approved individuals to form a team
+              Select 2 or 3 approved individuals to form a team
             </p>
           </div>
           <button className="btn btn-ghost btn-sm" onClick={fetchIndividuals}>↻ Refresh</button>
@@ -72,7 +72,7 @@ export default function TeamAllocation() {
           }}>
             <span style={{ fontSize: '20px' }}>✅</span>
             <p style={{ color: '#4ade80', fontSize: '14px' }}>
-              Team "<strong>{successMsg}</strong>" was successfully created! All 3 members have been notified via email.
+              Team "<strong>{successMsg}</strong>" was successfully created! All members have been notified via email.
             </p>
             <button onClick={() => setSuccessMsg('')} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: '#4ade80', cursor: 'pointer', fontSize: '18px' }}>×</button>
           </div>
@@ -161,15 +161,15 @@ export default function TeamAllocation() {
             <div style={{ marginBottom: '24px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                 <span style={{ fontSize: '13px', color: 'var(--text-muted)' }}>Members selected</span>
-                <span style={{ fontSize: '13px', fontWeight: 700, color: selected.length === 3 ? 'var(--green)' : 'var(--gold)' }}>
-                  {selected.length} / 3
+                <span style={{ fontSize: '13px', fontWeight: 700, color: selected.length >= 2 ? 'var(--green)' : 'var(--gold)' }}>
+                  {selected.length} / 3 (Min 2)
                 </span>
               </div>
               <div style={{ height: '6px', background: 'var(--bg-secondary)', borderRadius: '3px', overflow: 'hidden' }}>
                 <div style={{
                   height: '100%', borderRadius: '3px',
                   width: `${(selected.length / 3) * 100}%`,
-                  background: selected.length === 3 ? 'var(--green)' : 'var(--grad-primary)',
+                  background: selected.length >= 2 ? 'var(--green)' : 'var(--grad-primary)',
                   transition: 'width 0.3s ease',
                 }} />
               </div>
@@ -225,15 +225,15 @@ export default function TeamAllocation() {
             <button
               className="btn btn-primary"
               style={{ width: '100%' }}
-              disabled={selected.length !== 3 || !teamName.trim() || submitting}
+              disabled={selected.length < 2 || !teamName.trim() || submitting}
               onClick={allocate}
             >
               {submitting ? '⏳ Allocating...' : '🔗 Allocate Team & Notify Members'}
             </button>
 
-            {selected.length !== 3 && (
+            {selected.length < 2 && (
               <p style={{ fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center', marginTop: '10px' }}>
-                {3 - selected.length} more member{3 - selected.length !== 1 ? 's' : ''} needed
+                {2 - selected.length} more member{2 - selected.length !== 1 ? 's' : ''} needed minimum
               </p>
             )}
 
@@ -244,7 +244,7 @@ export default function TeamAllocation() {
               border: '1px solid rgba(6,182,212,0.2)',
               fontSize: '12px', color: 'var(--text-muted)', lineHeight: '1.6'
             }}>
-              📧 Once allocated, all 3 members will automatically receive a team notification email with teammate details.
+              📧 Once allocated, all members will automatically receive a team notification email with teammate details.
             </div>
           </div>
         </div>

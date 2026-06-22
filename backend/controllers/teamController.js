@@ -45,12 +45,16 @@ const updateTeamStatus = async (req, res) => {
     await Participant.updateMany({ teamId: team._id }, { status: memberStatus });
 
     // If team is approved, send email to all members
-    if (status === 'approved' && team.members && team.members.length > 0) {
-      const memberEmails = team.members.map(m => m.email);
-      const leaderParticipant = await Participant.findOne({ teamName: team.teamName }); // Fallback for leader name
-      const leaderName = leaderParticipant ? leaderParticipant.fullName : team.members[0].fullName;
-      
-      await sendTeamApprovalEmail(team.teamName, memberEmails.join(', '), leaderName);
+    try {
+      if (status === 'approved' && team.members && team.members.length > 0) {
+        const memberEmails = team.members.map(m => m.email);
+        const leaderParticipant = await Participant.findOne({ teamName: team.teamName }); // Fallback for leader name
+        const leaderName = leaderParticipant ? leaderParticipant.fullName : team.members[0].fullName;
+        
+        await sendTeamApprovalEmail(team.teamName, memberEmails.join(', '), leaderName);
+      }
+    } catch (emailErr) {
+      console.error('⚠️ Team status updated, but failed to send email:', emailErr.message);
     }
 
     await ActivityLog.create({
@@ -90,8 +94,8 @@ const allocateTeam = async (req, res) => {
   try {
     const { memberIds, teamName } = req.body;
 
-    if (!memberIds || memberIds.length !== 3)
-      return res.status(400).json({ success: false, message: 'Exactly 3 members must be selected.' });
+    if (!memberIds || memberIds.length < 2 || memberIds.length > 3)
+      return res.status(400).json({ success: false, message: 'Teams must have 2 or 3 members.' });
 
     if (!teamName || teamName.trim() === '')
       return res.status(400).json({ success: false, message: 'Team name is required.' });
@@ -103,7 +107,7 @@ const allocateTeam = async (req, res) => {
       status: 'approved',
     });
 
-    if (members.length !== 3)
+    if (members.length !== memberIds.length)
       return res.status(400).json({ success: false, message: 'Some selected participants are not eligible.' });
 
     // Check none already in a team
@@ -127,14 +131,18 @@ const allocateTeam = async (req, res) => {
     await Participant.updateMany({ _id: { $in: memberIds } }, { teamId: team._id, status: 'approved' });
 
     // Send notifications & emails
-    for (const member of members) {
-      const teammates = members.filter((m) => m._id.toString() !== member._id.toString());
-      await sendTeamAllocationEmail(member, teamName, teammates);
-      await Notification.create({
-        email: member.email,
-        message: `You've been allocated to Team "${teamName}" with ${teammates.map((t) => t.fullName).join(' & ')}.`,
-        type: 'team_allocation',
-      });
+    try {
+      for (const member of members) {
+        const teammates = members.filter((m) => m._id.toString() !== member._id.toString());
+        await sendTeamAllocationEmail(member, teamName, teammates);
+        await Notification.create({
+          email: member.email,
+          message: `You've been allocated to Team "${teamName}" with ${teammates.map((t) => t.fullName).join(' & ')}.`,
+          type: 'team_allocation',
+        });
+      }
+    } catch (emailErr) {
+      console.error('⚠️ Team allocated, but failed to send some emails/notifications:', emailErr.message);
     }
 
     await ActivityLog.create({

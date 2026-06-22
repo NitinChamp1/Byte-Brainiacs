@@ -58,10 +58,14 @@ const verifyRazorpayPayment = async (req, res) => {
           );
         }
 
-        if (updatedParticipant.registrationType === 'individual') {
-          await sendRegistrationEmail(updatedParticipant);
-        } else if (updatedParticipant.registrationType === 'team') {
-          await sendTeamRegistrationEmail(updatedParticipant, updatedParticipant.teamMembers, updatedParticipant.teamName);
+        try {
+          if (updatedParticipant.registrationType === 'individual') {
+            await sendRegistrationEmail(updatedParticipant);
+          } else if (updatedParticipant.registrationType === 'team') {
+            await sendTeamRegistrationEmail(updatedParticipant, updatedParticipant.teamMembers, updatedParticipant.teamName);
+          }
+        } catch (emailErr) {
+          console.error('⚠️ Payment verified but failed to send registration email:', emailErr.message);
         }
       }
 

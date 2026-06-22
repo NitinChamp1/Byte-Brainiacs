@@ -110,7 +110,7 @@ app.get(['/api/health', '/health'], (req, res) => {
 app.use((err, req, res, next) => {
   console.error('Global Error:', err);
   if (err.code === 'LIMIT_FILE_SIZE') {
-    return res.status(400).json({ success: false, message: 'File too large. Max 5MB allowed.' });
+    return res.status(400).json({ success: false, message: 'File too large. Max 2MB allowed.' });
   }
   res.status(err.status || 500).json({
     success: false,
